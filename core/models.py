@@ -1,20 +1,36 @@
 from django.db import models
 from django.utils import timezone
 
-# now = timezone.now()
+now = timezone.now()
 
 class Profession(models.Model):
     description = models.CharField(max_length = 50)
 
+    def __str__(self):
+        return self.description
 class DataSheet(models.Model):
     description = models.CharField(max_length = 50)
     historical_data = models.TextField()
-
+    def __str__(self):
+        return self.description
 class Customer(models.Model):
     name = models.CharField(max_length = 50)
     address = models.CharField(max_length = 50)
     profession = models.ManyToManyField(Profession)
     data_sheet = models.OneToOneField(DataSheet, on_delete=models.CASCADE)
+    active = models.BooleanField(default=True)
+    cu_number = models.CharField(max_length = 12,unique = True)
+
+    #for setting up status active more details
+    @property
+    def status_message(self):
+        if self.active:
+            return "Customer is Active"
+        else:
+            return "Customer is Not Active"
+
+    def num_professions(self):
+        return self.profession.all().count()
 
     def __str__(self):
         return self.name

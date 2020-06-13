@@ -6,7 +6,14 @@ from .serializer import(
      ) # import serialiser
 from rest_framework import viewsets #for model sets
 from rest_framework.response import Response
-
+from rest_framework.authentication import TokenAuthentication  #token-auth import to get the classes
+from rest_framework.permissions import(
+    AllowAny,
+    IsAdminUser, # use for permission if it is a ADMIN User Auth
+    IsAuthenticatedOrReadOnly,
+    DjangoModelPermissions, #this is use for auth permission reading direct to Model
+    DjangoModelPermissionsOrAnonReadOnly
+    )
 from django.http.response import HttpResponseNotAllowed # from the reponse Class
 from rest_framework.filters import SearchFilter,OrderingFilter #my search,orderFilter import
 from django_filters.rest_framework import DjangoFilterBackend
@@ -20,10 +27,11 @@ class CustomerViewSet(viewsets.ModelViewSet):
     ordering_fields = ('id','name')
     ordering = ('id',)
     lookup_field = 'cu_number'
-
+    authentication_classes = [TokenAuthentication,] #setting for token must be import first the auth
+    permission_classes = [IsAdminUser,] #permission setup if it is adnin auth
     # queryset = Customer.objects.all() #dataset objects
         #this is for overriding method from ModelViewSet -> Mixin
-    # import pdb; pdb.set_trace() for trace error
+    # import pdb; pdb.set_trace() for trace error in Database
 
     def get_queryset(self):
         address = self.request.query_params.get('address',None)
@@ -54,19 +62,19 @@ class CustomerViewSet(viewsets.ModelViewSet):
         serializer = CustomerSerializer(obj) #instance of a this objects
         return Response(serializer.data)
 
-    def create(self, request, *args, **kwargs):
-        data = request.data
-        customer = Customer.objects.create(
-            name = data['name'],
-            address=data['address'],
-            data_sheet_id=data['data_sheet']
-        )
-        profession = Profession.objects.get(id = data['profession']) # For aobject get id of Foreign Key
-        customer.profession.add(profession)
-        customer.save()
+    # def create(self, request, *args, **kwargs):
+    #     data = request.data
+    #     customer = Customer.objects.create(
+    #         name = data['name'],
+    #         address=data['address'],
+    #         data_sheet_id=data['data_sheet']
+    #     )
+    #     profession = Profession.objects.get(id = data['profession']) # For aobject get id of Foreign Key
+    #     customer.profession.add(profession)
+    #     customer.save()
 
-        serializer = CustomerSerializer
-        return Response(serializer.data)
+    #     serializer = CustomerSerializer
+    #     return Response(serializer.data)
 
     def update(self, request, *args, **kwargs):
         customer = self.get_object() #get the object
@@ -142,11 +150,14 @@ class CustomerViewSet(viewsets.ModelViewSet):
 class ProfessionViewSet(viewsets.ModelViewSet):
     queryset = Profession.objects.all()
     serializer_class =  ProfessionSerializer
-
+    authentication_classes = [TokenAuthentication,]
 class DataSheetViewSet(viewsets.ModelViewSet):
     queryset = DataSheet.objects.all()
     serializer_class =  DataSheetSerializer
+    permession_classes = [AllowAny,]
 
 class DocumentViewSet(viewsets.ModelViewSet):
     queryset = Document.objects.all()
     serializer_class =  DocumentSerializer
+    authentication_classes = [TokenAuthentication,]
+    permission_classes = [DjangoModelPermissionsOrAnonReadOnly,]

@@ -6,20 +6,22 @@ now = timezone.now()
 class Profession(models.Model):
     description = models.CharField(max_length = 50)
 
+    @property
     def __str__(self):
         return self.description
 class DataSheet(models.Model):
     description = models.CharField(max_length = 50)
     historical_data = models.TextField()
+
     def __str__(self):
         return self.description
 class Customer(models.Model):
     name = models.CharField(max_length = 50)
     address = models.CharField(max_length = 50)
     profession = models.ManyToManyField(Profession)
-    data_sheet = models.OneToOneField(DataSheet, on_delete=models.CASCADE)
+    data_sheet = models.OneToOneField(DataSheet, on_delete=models.CASCADE, null = True, blank = True)
     active = models.BooleanField(default=True)
-    cu_number = models.CharField(max_length = 12,unique = True)
+    cu_number = models.CharField(max_length = 12,unique = True,null = True, blank = True)
 
     #for setting up status active more details
     @property

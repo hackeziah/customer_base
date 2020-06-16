@@ -1,1 +1,1 @@
-web:gunicorn customer_base.wsgi --log-file -
+web: gunicorn customer_base.wsgi

@@ -1,1 +1,1 @@
-# customer_base
+# Sample API Django Practice
